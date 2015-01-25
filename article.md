@@ -62,7 +62,7 @@ This repository contains both Dockerfile, that will allow you to build the conta
 
 Next, you have to build this app. Execute the following command to do so and create a Docker image called "quickstart-go":
 
-	$ tutum build --tag quickstart-python .
+	$ tutum build --tag quickstart-go .
 	
 Note: The "." at the end of the previous command tells the Tutum CLI tool to build the image from the Dockerfile in the current directoy.
 
@@ -72,9 +72,9 @@ In this step you will push the Docker image you previously created.
 
 	$ tutum image push quickstart-go
 	Pushing quickstart-go to Tutum private registry ...
-	Tagging quickstart-go as tutum.co/maximeheckel/quickstart-go ...
+	Tagging quickstart-go as tutum.co/your-username/quickstart-go ...
 	Sending image list
-	Pushing repository tutum.co/maximeheckel/quickstart-go (1 tags)
+	Pushing repository tutum.co/your-username/quickstart-go (1 tags)
 	Image 511136ea3c5a already pushed, skipping
 	Image 36fd425d7d8a already pushed, skipping
 	Image aaabd2b41e22 already pushed, skipping
@@ -104,10 +104,10 @@ Now that the image is pushed on the registry, you can check the image list by us
 
 In this step you will deploy the app as a Tutum Service. In order to do so you just have to run the following command:
 
-	$ tutum service run -p 8080 --name quickstart-go tutum.co/your-username/quickstart-go
+	$ tutum service run -p 80 --name quickstart-go tutum.co/your-username/quickstart-go
 
 The **run** command will create and launch the service unsing the quickstart-go image we preiously built and pushed on the registry.
-The **-p 8080** flag is used to publish the port 8080 that is exported in the Dockerfile.
+The **-p 80** flag is used to publish the port 80 that is exported in the Dockerfile.
 
 The container will be running after a few minutes. By executing the following command you can check the status of the services you have deployed on Tutum:
 
@@ -120,7 +120,7 @@ In order tog et the url of your Golang application, just run:
 
 	$ tutum container ps
 	NAME             UUID      STATUS     IMAGE                                       RUN COMMAND      EXIT CODE  DEPLOYED        PORTS
-	quickstart-go-1  accba6a7  ▶ Running  tutum.co/maximeheckel/quickstart-go:latest                              15 minutes ago  quickstart-go-1.your-username.cont.tutum.io:49154->8080/tcp
+	quickstart-go-1  accba6a7  ▶ Running  tutum.co/your-username/quickstart-go:latest                              15 minutes ago  quickstart-go-1.your-username.cont.tutum.io:49154->80/tcp
 	
 You can now copy and paste the link into your browser or just use curl 
 on that URL. In this example the URL is [quickstart-go-1.your-username.cont.tutum.io:49154]().
@@ -135,14 +135,14 @@ You have now deployed your first Golang service on Tutum.
 
 The service we've just deployed is running on a single container. In case this container goes down for some reason, this might be a problem. Tutum gives you the ability to scale your services,i.e. to put your app on more than one container, with the following command:
 
-	$ tutum scale quickstart-go 2
+	$ tutum service scale quickstart-go 2
 	
 Now if you list again your running services you have a second conatiner that has just been launched:
 
 	$ tutum container ps           (master✱)
 	NAME             UUID      STATUS     IMAGE                                       RUN COMMAND      EXIT CODE  DEPLOYED       PORTS
-	quickstart-go-1  accba6a7  ▶ Running  tutum.co/your-username/quickstart-go:latest                              1 hour ago     quickstart-go-1.your-username.cont.tutum.io:49154->8080/tcp
-	quickstart-go-2  7f79cc5c  ▶ Running  tutum.co/your-username/quickstart-go:latest                              2 minutes ago  quickstart-go-2.your-username.cont.tutum.io:49155->8080/tcp
+	quickstart-go-1  accba6a7  ▶ Running  tutum.co/your-username/quickstart-go:latest                              1 hour ago     quickstart-go-1.your-username.cont.tutum.io:49154->80/tcp
+	quickstart-go-2  7f79cc5c  ▶ Running  tutum.co/your-username/quickstart-go:latest                              2 minutes ago  quickstart-go-2.your-username.cont.tutum.io:49155->80/tcp
 	
 #7. View logs
 
@@ -160,4 +160,32 @@ In this part, you will see how to deploy and use a loadbalancer with Tutum. A lo
 The quickstart-go service has 2 containers running, and thanks to [Tutum's HAProxy image](https://github.com/tutumcloud/tutum-docker-clusterproxy), you will be able to do loadbalance on it.
 
 	$ tutum service run -p 80:80/tcp --role global --autorestart ALWAYS --link-service quickstart-go:quickstart-go --name golb tutum/haproxy
+	
+Let's take a look at the flags :
+
+- -p 80:80/tcp will publish the port 80 of the container and map it to the prot 80 of the node
+- --role global grants Tutum API access from within the service, more info [here](https://support.tutum.co/support/solutions/articles/5000524639-api-roles)
+
+- --autorestart ALWAYS restarts the linked containers if they're stopped, more info [here](https://support.tutum.co/support/solutions/articles/5000012174-autorestart)
+- --link-service quickstart-go:quickstart-go links the loadbalancer service with the service quickstart-go. This link is now aliased *quickstart-go*, more info [here](https://support.tutum.co/support/solutions/articles/5000012181-service-links)
+
+Now, if you list your services you will get:
+
+	$ tutum service ps
+	NAME           UUID      STATUS     IMAGE                                       DEPLOYED
+	quickstart-go  8572d1a9  ▶ Running  tutum.co/your-username/quickstart-go:latest  10 minutes ago
+	golb           aee134b2  ▶ Running  tutum/haproxy:latest                        6 minutes ago
+	
+Let's check the containers running for this service:
+
+	$ tutum container ps
+	
+	NAME             UUID      STATUS     IMAGE                                       RUN COMMAND      EXIT CODE  DEPLOYED        PORTS
+	quickstart-go-1  28d44b2c  ▶ Running  tutum.co/your-username/quickstart-go:latest                              12 minutes ago  quickstart-go-1.your-username.cont.tutum.io:49162->80/tcp
+	quickstart-go-2  ae30024d  ▶ Running  tutum.co/your-username/quickstart-go:latest                              9 minutes ago   quickstart-go-2.your-username.cont.tutum.io:49163->80/tcp
+	golb-1           2743cec9  ▶ Running  tutum/haproxy:latest                        /run.sh                     7 minutes ago   443/tcp, golb-1.your-username.cont.tutum.io:80->80/tcp
+
+You can now have access to your app by using the endpoint from the loadbalancer : [golb-1.your-username.cont.tutum.io](). You will end either on the quickstart-go-1 or on the quickstart-go-2 container. You can find a complete tutorial about how the load balander works [here](https://support.tutum.co/support/articles/5000050235-load-balancing-a-web-service).
+
+
 
