@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"runtime"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -17,11 +16,12 @@ type Person struct {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<h1>hello, world</h1>\nI'm running on %s with an %s CPU.\n The name of this program is : %s and runs with a MongoDB database named %s", runtime.GOOS, runtime.GOARCH, os.Getenv("NAME"), os.Getenv("MONGO_URL"))
+	hostname, _ := os.Hostname()
+	fmt.Fprintf(w, "<h1>hello, %s</h1>\n<b>Hostname:</b> %s<br/>", os.Getenv("NAME"), hostname)
 }
 
 func main() {
-	session, err := mgo.Dial(os.Getenv("MONGO_URL"))
+	session, err := mgo.Dial("mongo")
 	if err == nil {
 		defer session.Close()
 		session.SetMode(mgo.Monotonic, true)
@@ -33,7 +33,9 @@ func main() {
 		result := Person{}
 
 		err = c.Find(bson.M{"name": "Golang"}).One(&result)
-		fmt.Println("Golang is: ", result.Type)
+		fmt.Println("Golang is:", result.Type)
+	} else {
+		fmt.Println("Please link a service named \"mongo\" to this service.")
 	}
 	http.HandleFunc("/", indexHandler)
 	http.ListenAndServe(":80", nil)
