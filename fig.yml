@@ -1,0 +1,10 @@
+web:
+  build: .
+  links:
+    - "mongo:mongo"
+  ports:
+    - "80:80"
+mongo:
+  image: tutum/mongodb
+  environment:
+    - AUTH=no
