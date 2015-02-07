@@ -2,41 +2,36 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
-type Person struct {
-	Name string
-	Type string
-}
-
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	hostname, _ := os.Hostname()
-	fmt.Fprintf(w, "<h1>hello, %s</h1>\n<b>Hostname:</b> %s<br/>", os.Getenv("NAME"), hostname)
-}
-
-func main() {
+func mongoConnect() (s string) {
+	
 	session, err := mgo.Dial("mongo")
 	if err == nil {
 		defer session.Close()
-		session.SetMode(mgo.Monotonic, true)
-		c := session.DB("quicksell").C("people")
-		err = c.Insert(&Person{"Golang", "Awesome"})
-		if err != nil {
-			log.Fatal(err)
-		}
-		result := Person{}
-
-		err = c.Find(bson.M{"name": "Golang"}).One(&result)
-		fmt.Println("Golang is:", result.Type)
+		s = "Connected"
 	} else {
-		fmt.Println("Please link a service named \"mongo\" to this service.")
+		s = "Not available"
 	}
+		return s
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+
+	hostname, _ := os.Hostname()
+	mongostatus := mongoConnect()
+	fmt.Fprintf(w, "<h1>hello, %s</h1>\n<b>Hostname: </b>%s<br><b>MongoDB Status: </b>%s", os.Getenv("NAME"), hostname, mongostatus)
+	fmt.Println(hostname, "handled HTTP REQUEST at", time.Now(), "\nMongoDB Status:", mongostatus)
+
+}
+
+func main() {
+
 	http.HandleFunc("/", indexHandler)
 	http.ListenAndServe(":80", nil)
 }
