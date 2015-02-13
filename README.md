@@ -4,20 +4,28 @@ A simple Golang web app (using Martini) which can easily be deployed to Tutum.
 
 This application support the [Getting Started with Golang on Tutum]() article - check it out
 
-#Running locally
+## Running locally
+
+
+Build and run using Docker:
 
 	$ git clone https://github.com/tutumcloud/quickstart-go
 	$ cd quickstart-go
 	$ docker build -t quickstart-go .
-	$ docker run -d -p 80 quickstart-go -n goweb
+	$ docker run -d -p 80 quickstart-go 
 
-Alternatively, you can run the dockerized version:
+Or using fig:
 
-	$ docker run -d -p 80 tutum/quickstart-go
+	$ git clone https://github.com/tutumcloud/quickstart-go
+	$ cd quickstart-go
+	$ fig up
 
-Your app should now be running
+Or run the pre-built/dockerized version:
 
-#Deploying to Tutum
+	$ docker run -d --env AUTH=no --name mongo tutum/mongodb
+	$ docker run -d -p 80 --link mongo:mongo tutum/quickstart-go
+
+## Deploying to Tutum
 
 [Install the Tutum CLI.](https://support.tutum.co/support/solutions/articles/5000049209-installing-the-command-line-interface-tool)
 
