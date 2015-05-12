@@ -1,0 +1,10 @@
+web:
+  image: tutum/quickstart-go
+  links:
+    - "mongo:mongo"
+  ports:
+    - "80"
+mongo:
+  image: tutum/mongodb
+  environment:
+    - AUTH=no
