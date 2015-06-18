@@ -7,6 +7,6 @@ RUN go install github.com/tutumcloud/quickstart-go
 
 ENV NAME world
 
-ENTRYPOINT /go/bin/quickstart-go
+CMD /go/bin/quickstart-go
 
 EXPOSE 80
