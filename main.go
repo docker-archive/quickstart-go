@@ -25,12 +25,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	hostname, _ := os.Hostname()
 	mongostatus := mongoConnect()
-	fmt.Fprintf(w, "<h1>hello, %s</h1>\n<b>Hostname: </b>%s<br><b>MongoDB Status: </b>%s", os.Getenv("NAME"), hostname, mongostatus)
+	fmt.Fprintf(w, "<h1>hello world, %s</h1>\n<b>Hostname: </b>%s<br><b>MongoDB Status: </b>%s", os.Getenv("NAME"), hostname, mongostatus)
 	fmt.Println(hostname, "handled HTTP REQUEST at", time.Now(), "\nMongoDB Status:", mongostatus)
 }
 
 func main() {
 	http.HandleFunc("/", indexHandler)
-	fmt.Println("Listening on port 80 for requests...")
+	fmt.Println("Everything is working !\n Listening on port 80 for requests...")
 	http.ListenAndServe(":80", nil)
 }
