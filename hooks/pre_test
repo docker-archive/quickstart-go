@@ -1,2 +1,2 @@
-#!/bin/sh
-echo -e  "\e[44mThis is the pre-test test"
+#!/bin/bash
+echo -e "\e[44mThis is the pre-test test"
