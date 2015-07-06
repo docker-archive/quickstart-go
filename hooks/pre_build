@@ -1,0 +1,2 @@
+#!/bin/bash
+echo -e "\e[42mThis is the pre-build test"

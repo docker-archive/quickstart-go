@@ -1,0 +1,2 @@
+#!/bin/bash
+echo -e "\e[43mThis is the pre-push test"
