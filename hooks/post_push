@@ -1,2 +1,2 @@
 #!/bin/sh
-echo "\e[43mThis is the post-push test"
+echo -e  "\e[43mThis is the post-push test"
